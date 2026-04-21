@@ -1,22 +1,24 @@
 package com.datingai.milvus;
 
-import io.milvus.client.MilvusClient;
+import com.datingai.llm.EmbeddingService;
 import io.milvus.client.MilvusServiceClient;
 import io.milvus.grpc.SearchResults;
 import io.milvus.param.ConnectParam;
 import io.milvus.param.MetricType;
-import io.milvus.param.R; 
+import io.milvus.param.R;
 import io.milvus.param.collection.CreateCollectionParam;
 import io.milvus.param.collection.DescribeCollectionParam;
 import io.milvus.param.dml.InsertParam;
 import io.milvus.param.dml.SearchParam;
 import io.milvus.response.SearchResultsWrapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import jakarta.annotation.PostConstruct;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class MilvusService {
@@ -29,6 +31,9 @@ public class MilvusService {
 
     private MilvusServiceClient milvusClient;
     private final String collectionName = "dating_knowledge";
+
+    @Autowired
+    private EmbeddingService embeddingService;
 
     @PostConstruct
     public void init() {
@@ -79,16 +84,22 @@ public class MilvusService {
                 .build();
 
         R<SearchResults> searchResponse = milvusClient.search(searchParam);
-        // 处理搜索结果并返回
-        return List.of();
+        List<VectorizedKnowledge> results = new ArrayList<>();
+
+        if (searchResponse.getStatus() == R.Status.Success.getCode()) {
+            SearchResultsWrapper wrapper = new SearchResults(searchResponse.getData());
+            for (int i = 0; i < wrapper.getResultCount(); i++) {
+                VectorizedKnowledge knowledge = new VectorizedKnowledge();
+                knowledge.setId(Long.parseLong(wrapper.getFieldData("id", i).toString()));
+                knowledge.setTitle(wrapper.getFieldData("title", i).toString());
+                knowledge.setContent(wrapper.getFieldData("content", i).toString());
+                results.add(knowledge);
+            }
+        }
+        return results;
     }
-//    private float[] getEmbedding(String text) {
-//        if (embeddingApiEnabled) {
-//            // 调用API获取嵌入
-//            return callEmbeddingApi(text);
-//        } else {
-//            // 使用本地模型获取嵌入
-//            return getLocalEmbedding(text);
-//        }
-//    }
+
+    public float[] getEmbedding(String text) throws IOException {
+        return embeddingService.getEmbedding(text);
+    }
 }

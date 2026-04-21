@@ -21,19 +21,18 @@ public class LLMService {
     @Value("${llm.api.url}")
     private String apiUrl;
 
-    @Value("${llm.api.key}")
-    private String apiKey;
+    @Value("${llm.model}")
+    private String model;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public String getDatingAdvice(String question) throws IOException {
         try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
             HttpPost httpPost = new HttpPost(apiUrl);
-            httpPost.setHeader("Authorization", "Bearer " + apiKey);
             httpPost.setHeader("Content-Type", "application/json");
 
             Map<String, Object> requestBody = new HashMap<>();
-            requestBody.put("model", "deepseek-chat");
+            requestBody.put("model", model);
             requestBody.put("messages", new Object[]{
                 Map.of("role", "system", "content", "你是一个专业的情感顾问，专注于帮助用户解决脱单问题。请提供具体、实用的建议，帮助用户提升社交技能和建立健康的恋爱关系。"),
                 Map.of("role", "user", "content", question)
