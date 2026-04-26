@@ -33,15 +33,17 @@ public class EmbeddingService {
 
             Map<String, Object> requestBody = new HashMap<>();
             requestBody.put("model", model);
-            requestBody.put("prompt", text);
+            requestBody.put("input", text);
 
             String jsonBody = objectMapper.writeValueAsString(requestBody);
             httpPost.setEntity(new StringEntity(jsonBody, ContentType.APPLICATION_JSON));
 
             try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
                 JsonNode responseNode = objectMapper.readTree(response.getEntity().getContent());
-                JsonNode embeddingNode = responseNode.get("embedding");
+                JsonNode embeddingsNode = responseNode.get("embeddings");
                 
+                // Ollama返回的是embeddings数组，取第一个元素
+                JsonNode embeddingNode = embeddingsNode.get(0);
                 float[] embedding = new float[embeddingNode.size()];
                 for (int i = 0; i < embeddingNode.size(); i++) {
                     embedding[i] = (float) embeddingNode.get(i).asDouble();

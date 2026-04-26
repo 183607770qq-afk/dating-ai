@@ -87,8 +87,8 @@ public class MilvusService {
         List<VectorizedKnowledge> results = new ArrayList<>();
 
         if (searchResponse.getStatus() == R.Status.Success.getCode()) {
-            SearchResultsWrapper wrapper = new SearchResults(searchResponse.getData());
-            for (int i = 0; i < wrapper.getResultCount(); i++) {
+            SearchResultsWrapper wrapper = new SearchResultsWrapper(searchResponse.getData().getResults());
+            for (int i = 0; i < wrapper.getRowRecords().size(); i++) {
                 VectorizedKnowledge knowledge = new VectorizedKnowledge();
                 knowledge.setId(Long.parseLong(wrapper.getFieldData("id", i).toString()));
                 knowledge.setTitle(wrapper.getFieldData("title", i).toString());
