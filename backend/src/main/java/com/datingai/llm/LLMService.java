@@ -1,51 +1,50 @@
 package com.datingai.llm;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.hc.client5.http.classic.methods.HttpPost;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
-import org.apache.hc.client5.http.impl.classic.HttpClients;
-import org.apache.hc.core5.http.ContentType;
-import org.apache.hc.core5.http.io.entity.StringEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 
 @Service
 public class LLMService {
 
-    @Value("${llm.api.url}")
-    private String apiUrl;
+    private static final Logger logger = LoggerFactory.getLogger(LLMService.class);
 
-    @Value("${llm.model}")
-    private String model;
+    private final Map<String, DatingAdviceClient> adviceClients;
+    private final String provider;
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    public LLMService(
+            Map<String, DatingAdviceClient> adviceClients,
+            @Value("${llm.provider:langchain4j}") String provider) {
+        this.adviceClients = adviceClients;
+        this.provider = provider;
+    }
 
     public String getDatingAdvice(String question) throws IOException {
-        try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
-            HttpPost httpPost = new HttpPost(apiUrl);
-            httpPost.setHeader("Content-Type", "application/json");
+        if (!StringUtils.hasText(question)) {
+            return "请先告诉我你的具体困惑，比如聊天开场、约会安排、关系推进或冲突沟通。";
+        }
 
-            Map<String, Object> requestBody = new HashMap<>();
-            requestBody.put("model", model);
-            requestBody.put("messages", new Object[]{
-                Map.of("role", "system", "content", "你是一个专业的情感顾问，专注于帮助用户解决脱单问题。请提供具体、实用的建议，帮助用户提升社交技能和建立健康的恋爱关系。"),
-                Map.of("role", "user", "content", question)
-            });
-            requestBody.put("temperature", 0.7);
+        DatingAdviceClient adviceClient = adviceClients.get(provider);
+        if (adviceClient == null) {
+            throw new IOException("Unknown LLM provider: " + provider);
+        }
 
-            String jsonBody = objectMapper.writeValueAsString(requestBody);
-            httpPost.setEntity(new StringEntity(jsonBody, ContentType.APPLICATION_JSON));
+        logger.info("Getting dating advice with provider: {}", provider);
 
-            try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
-                JsonNode responseNode = objectMapper.readTree(response.getEntity().getContent());
-                return responseNode.get("choices").get(0).get("message").get("content").asText();
-            }
+        try {
+            /*
+             * LLMService 是门面层：Controller 只调用它，不关心底层使用哪种实现。
+             * 通过 llm.provider 可以在 legacy 和 langchain4j 之间切换，便于学习和回滚。
+             */
+            return adviceClient.getAdvice(question);
+        } catch (Exception e) {
+            logger.error("Error calling LLM provider: {}", provider, e);
+            throw new IOException("Failed to get advice from LLM: " + e.getMessage(), e);
         }
     }
 }

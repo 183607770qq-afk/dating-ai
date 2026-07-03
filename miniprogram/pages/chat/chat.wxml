@@ -1,0 +1,69 @@
+<view class="chat-page">
+  <!-- 头部导航 -->
+  <view class="chat-header">
+    <view class="header-left" bindtap="goBack">
+      <text class="back-icon">←</text>
+    </view>
+    <view class="header-title">
+      <text class="title-text">关系顾问</text>
+      <text class="title-desc">在线陪你拆解当下场景</text>
+    </view>
+    <view class="header-right">
+      <text class="online-dot"></text>
+    </view>
+  </view>
+
+  <!-- 聊天消息区域 -->
+  <scroll-view 
+    class="chat-messages" 
+    scroll-y 
+    scroll-top="{{scrollTop}}"
+    scroll-with-animation="true"
+    bindscrolltolower="onScrollToLower"
+  >
+    <!-- 消息列表 -->
+    <view 
+      wx:for="{{messages}}"
+      wx:for-item="message"
+      wx:key="index"
+      class="message {{message.role === 'user' ? 'user-message' : 'ai-message'}}"
+    >
+      <view class="message-avatar">
+        <text wx:if="{{message.role === 'user'}}">我</text>
+        <text wx:else>AI</text>
+      </view>
+      <view class="message-content">
+        <text>{{message.content}}</text>
+      </view>
+    </view>
+
+    <!-- 加载中状态 -->
+    <view wx:if="{{loading}}" class="typing-indicator">
+      <view class="typing-dots">
+        <view class="dot"></view>
+        <view class="dot"></view>
+        <view class="dot"></view>
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- 输入区域 -->
+  <view class="chat-input">
+    <textarea 
+      class="input-textarea"
+      value="{{inputMessage}}"
+      placeholder="描述一下你们的聊天、约会或关系困惑..."
+      maxlength="1000"
+      auto-height
+      show-confirm-bar="false"
+      bindinput="onInput"
+      bindconfirm="sendMessage"
+    ></textarea>
+    <view 
+      class="send-btn {{!inputMessage.trim() || loading ? 'disabled' : ''}}"
+      bindtap="sendMessage"
+    >
+      <text class="send-icon">发</text>
+    </view>
+  </view>
+</view>

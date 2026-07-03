@@ -32,7 +32,7 @@
         <!-- 订阅状态 -->
         <div v-if="userStore.getIsLoggedIn" class="subscription-status">
           <div v-if="userStore.getIsSubscribed" class="status-active">
-            <el-icon class="status-icon"><CheckCircle /></el-icon>
+            <el-icon class="status-icon"><CircleCheckFilled /></el-icon>
             <h3>您当前是订阅用户</h3>
             <p>订阅到期时间: {{ formatDate(userStore.subscriptionEndDate) }}</p>
           </div>
@@ -213,7 +213,9 @@
 import { useRouter } from 'vue-router'
 import { useUserStore } from '../store/user'
 import { ElMessage } from 'element-plus'
-import { CheckCircle, InfoFilled, Check } from '@element-plus/icons-vue'
+// import { CheckCircle } from '@element-plus/icons-vue'
+import { CircleCheckFilled } from '@element-plus/icons-vue'
+import { InfoFilled, Check } from '@element-plus/icons-vue'
 import dayjs from 'dayjs'
 
 const router = useRouter()

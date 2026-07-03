@@ -67,6 +67,18 @@ CREATE TABLE IF NOT EXISTS chat_messages (
     INDEX idx_created_at (created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='聊天记录表';
 
+-- 对话摘要表（长期记忆）
+CREATE TABLE IF NOT EXISTS conversation_summaries (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '摘要ID',
+    user_id BIGINT NOT NULL COMMENT '用户ID',
+    summary_text TEXT NOT NULL COMMENT '摘要文本',
+    message_count_at_summary BIGINT NOT NULL DEFAULT 0 COMMENT '生成摘要时的消息总数',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    UNIQUE INDEX idx_user_id (user_id),
+    INDEX idx_created_at (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='对话摘要表（长期记忆，每个用户只保留最新一条）';
+
 -- 知识浏览记录表（可选）
 CREATE TABLE IF NOT EXISTS knowledge_views (
     id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '浏览ID',

@@ -57,7 +57,7 @@
               <el-tab-pane label="订阅状态" name="subscription">
                 <div class="subscription-info">
                   <div v-if="userStore.getIsSubscribed" class="status-active">
-                    <el-icon class="status-icon"><CheckCircle /></el-icon>
+                    <el-icon class="status-icon"><CircleCheckFilled /></el-icon>
                     <h3>您当前是订阅用户</h3>
                     <p>订阅类型: {{ subscriptionType }}</p>
                     <p>订阅到期时间: {{ formatDate(userStore.subscriptionEndDate) }}</p>
@@ -73,7 +73,23 @@
               </el-tab-pane>
               <el-tab-pane label="历史记录" name="history">
                 <div class="history-info">
-                  <el-empty description="暂无历史记录" />
+                  <div v-if="historyMessages.length === 0 && !historyLoading">
+                    <el-empty description="暂无历史记录" />
+                  </div>
+                  <div v-else class="history-list">
+                    <div 
+                      v-for="msg in historyMessages" 
+                      :key="msg.id" 
+                      :class="['history-item', msg.role === 'user' ? 'user-msg' : 'ai-msg']"
+                    >
+                      <div class="history-role">{{ msg.role === 'user' ? '你' : 'AI顾问' }}</div>
+                      <div class="history-content">{{ msg.content }}</div>
+                      <div class="history-time">{{ formatTime(msg.createdAt) }}</div>
+                    </div>
+                  </div>
+                  <div v-if="historyTotal > historyMessages.length" class="history-load-more">
+                    <el-button @click="loadMoreHistory" :loading="historyLoading">加载更多</el-button>
+                  </div>
                 </div>
               </el-tab-pane>
               <el-tab-pane label="设置" name="settings">
@@ -134,11 +150,12 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { useUserStore } from '../store/user'
-import { CheckCircle, InfoFilled } from '@element-plus/icons-vue'
+import { CircleCheckFilled, InfoFilled } from '@element-plus/icons-vue'
 import dayjs from 'dayjs'
 
+const API_BASE_URL = 'http://localhost:8080/api'
 const userStore = useUserStore()
 const activeTab = ref('info')
 
@@ -167,6 +184,55 @@ const handleLogout = () => {
 const formatDate = (date) => {
   return dayjs(date).format('YYYY-MM-DD')
 }
+
+// ---- 历史记录相关 ----
+const historyMessages = ref([])
+const historyTotal = ref(0)
+const historyPage = ref(0)
+const historyLoading = ref(false)
+
+const loadHistory = async (page = 0) => {
+  const token = localStorage.getItem('token')
+  if (!token) return
+
+  historyLoading.value = true
+  try {
+    const response = await fetch(`${API_BASE_URL}/chat/history?page=${page}&size=20`, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    if (!response.ok) {
+      historyLoading.value = false
+      return
+    }
+    const data = await response.json()
+    if (page === 0) {
+      historyMessages.value = data.messages || []
+    } else {
+      historyMessages.value.push(...(data.messages || []))
+    }
+    historyTotal.value = data.total || 0
+    historyPage.value = page
+  } catch (e) {
+    console.error('Failed to load history:', e)
+  } finally {
+    historyLoading.value = false
+  }
+}
+
+const loadMoreHistory = () => {
+  loadHistory(historyPage.value + 1)
+}
+
+const formatTime = (timeStr) => {
+  return dayjs(timeStr).format('MM-DD HH:mm')
+}
+
+// 切换到历史记录 Tab 时自动加载
+watch(activeTab, (tab) => {
+  if (tab === 'history' && historyMessages.value.length === 0) {
+    loadHistory(0)
+  }
+})
 </script>
 
 <style scoped>
@@ -420,5 +486,54 @@ const formatDate = (date) => {
   .profile-container {
     padding: 20px;
   }
+}
+
+/* 历史记录样式 */
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.history-item {
+  padding: 12px 16px;
+  border-radius: 8px;
+  background-color: #f5f7fa;
+}
+
+.history-item.user-msg {
+  background-color: #ecf5ff;
+  border-left: 3px solid #409eff;
+}
+
+.history-item.ai-msg {
+  background-color: #f0f9eb;
+  border-left: 3px solid #67c23a;
+}
+
+.history-role {
+  font-size: 12px;
+  color: #909399;
+  margin-bottom: 6px;
+}
+
+.history-content {
+  font-size: 14px;
+  color: #333;
+  line-height: 1.6;
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+
+.history-time {
+  font-size: 12px;
+  color: #c0c4cc;
+  margin-top: 8px;
+  text-align: right;
+}
+
+.history-load-more {
+  text-align: center;
+  padding: 16px 0;
 }
 </style>

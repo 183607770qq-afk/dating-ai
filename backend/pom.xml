@@ -57,7 +57,7 @@
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt</artifactId>
-            <version>0.9.1</version>
+            <version>0.12.6</version>
         </dependency>
 
         <!-- HTTP Client for LLM API -->
@@ -65,6 +65,18 @@
             <groupId>org.apache.httpcomponents.client5</groupId>
             <artifactId>httpclient5</artifactId>
             <version>5.3</version>
+        </dependency>
+
+        <!-- LangChain4j: Java 生态中最常用的 LangChain 风格框架 -->
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j</artifactId>
+            <version>1.11.8</version>
+        </dependency>
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j-ollama</artifactId>
+            <version>1.11.8</version>
         </dependency>
 
         <!-- Jackson for JSON Processing -->

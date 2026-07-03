@@ -45,34 +45,34 @@
       <div class="container">
         <h3>核心功能</h3>
         <div class="features-grid">
-          <div class="feature-item">
+          <router-link to="/chat" class="feature-item">
             <div class="feature-icon">
               <i class="el-icon-message"></i>
             </div>
             <h4>AI情感咨询</h4>
             <p>基于DeepSeek大模型，为你提供专业的情感建议</p>
-          </div>
-          <div class="feature-item">
+          </router-link>
+          <router-link to="/knowledge" class="feature-item">
             <div class="feature-icon">
               <i class="el-icon-collection"></i>
             </div>
             <h4>情感知识库</h4>
             <p>丰富的情感知识，帮助你更好地理解和处理人际关系</p>
-          </div>
-          <div class="feature-item">
+          </router-link>
+          <router-link to="/subscription" class="feature-item">
             <div class="feature-icon">
               <i class="el-icon-document"></i>
             </div>
             <h4>个性化建议</h4>
             <p>根据你的具体情况，提供定制化的脱单策略</p>
-          </div>
-          <div class="feature-item">
+          </router-link>
+          <router-link to="/subscription" class="feature-item">
             <div class="feature-icon">
               <i class="el-icon-lock"></i>
             </div>
             <h4>隐私保护</h4>
             <p>严格保护你的个人信息和聊天记录</p>
-          </div>
+          </router-link>
         </div>
       </div>
     </section>
@@ -299,6 +299,9 @@ const handleLogout = () => {
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
   text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  display: block;
 }
 
 .feature-item:hover {

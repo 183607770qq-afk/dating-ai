@@ -1,0 +1,145 @@
+.profile-page {
+  min-height: 100vh;
+  background: #fff8f6;
+}
+
+.user-section {
+  background: linear-gradient(180deg, #fff1ec 0%, #fff8f6 100%);
+  padding: 58rpx 34rpx 34rpx;
+}
+
+.user-info,
+.login-prompt {
+  display: flex;
+  align-items: center;
+  padding: 30rpx;
+  border-radius: 26rpx;
+  background: #ffffff;
+  box-shadow: 0 14rpx 38rpx rgba(90, 64, 56, 0.08);
+}
+
+.avatar {
+  width: 112rpx;
+  height: 112rpx;
+  border-radius: 28rpx;
+  background: #d85c5c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 26rpx;
+}
+
+.guest-avatar {
+  background: #f1eadf;
+}
+
+.avatar-text {
+  font-size: 42rpx;
+  color: #ffffff;
+  font-weight: 800;
+}
+
+.guest-avatar .avatar-text {
+  color: #8f4a43;
+  font-size: 30rpx;
+}
+
+.user-detail {
+  flex: 1;
+}
+
+.username {
+  display: block;
+  font-size: 34rpx;
+  font-weight: 800;
+  color: #2f2928;
+  margin-bottom: 8rpx;
+}
+
+.user-desc {
+  font-size: 25rpx;
+  color: #8f8580;
+  line-height: 1.45;
+}
+
+.login-btn {
+  background: #d85c5c;
+  padding: 16rpx 30rpx;
+  border-radius: 999rpx;
+}
+
+.btn-text {
+  font-size: 26rpx;
+  color: #ffffff;
+  font-weight: 800;
+}
+
+.menu-section {
+  padding: 0 28rpx 20rpx;
+}
+
+.menu-group {
+  background: #ffffff;
+  border-radius: 22rpx;
+  margin-bottom: 18rpx;
+  overflow: hidden;
+  box-shadow: 0 10rpx 28rpx rgba(90, 64, 56, 0.05);
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  min-height: 100rpx;
+  padding: 18rpx 24rpx;
+  border-bottom: 1rpx solid #f6eeeb;
+}
+
+.menu-item:last-child {
+  border-bottom: none;
+}
+
+.menu-icon {
+  width: 54rpx;
+  height: 54rpx;
+  border-radius: 16rpx;
+  background: #fff1ec;
+  color: #b65d55;
+  font-size: 22rpx;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 20rpx;
+}
+
+.menu-text {
+  flex: 1;
+  font-size: 29rpx;
+  color: #3c3532;
+  font-weight: 650;
+}
+
+.menu-arrow {
+  font-size: 34rpx;
+  color: #d8c8c0;
+}
+
+.logout-item {
+  justify-content: center;
+}
+
+.logout-text {
+  color: #d85c5c;
+  text-align: center;
+  flex: 1;
+}
+
+.footer {
+  text-align: center;
+  padding: 32rpx 32rpx 46rpx;
+}
+
+.footer-text {
+  font-size: 23rpx;
+  color: #a99d98;
+}

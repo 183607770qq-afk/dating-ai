@@ -1,0 +1,77 @@
+<view class="home">
+  <view class="header">
+    <view class="top-row">
+      <view>
+        <text class="eyebrow">AI RELATIONSHIP COACH</text>
+        <text class="logo-text">脱单AI</text>
+      </view>
+      <view wx:if="{{isLoggedIn}}" class="user-chip">{{avatarText}}</view>
+      <view wx:else class="login-pill" bindtap="goToLogin">登录</view>
+    </view>
+    <view class="subtitle">把暧昧、约会和沟通难题，变成下一句可以发出去的话。</view>
+    <view class="hero-actions">
+      <view class="primary-action" bindtap="goToChat">开始咨询</view>
+      <view class="ghost-action" bindtap="goToKnowledge">看技巧</view>
+    </view>
+  </view>
+
+  <view class="main-content">
+    <view class="insight-panel">
+      <view class="panel-head">
+        <text class="panel-title">今日关系提示</text>
+        <text class="panel-tag">3 分钟练习</text>
+      </view>
+      <text class="panel-copy">别急着证明自己多好。先回应对方当下的情绪，再提出一个轻松的问题。</text>
+    </view>
+
+    <view class="features">
+      <view class="feature-card" bindtap="goToChat">
+        <view class="feature-icon chat-icon">
+          <text class="icon-text">聊</text>
+        </view>
+        <view class="feature-content">
+          <text class="feature-title">AI 情感咨询</text>
+          <text class="feature-desc">分析聊天截图、约会节奏和关系困惑</text>
+        </view>
+        <view class="feature-arrow">→</view>
+      </view>
+
+      <view class="feature-card" bindtap="goToKnowledge">
+        <view class="feature-icon knowledge-icon">
+          <text class="icon-text">学</text>
+        </view>
+        <view class="feature-content">
+          <text class="feature-title">情感知识库</text>
+          <text class="feature-desc">开场、邀约、表达好感都有方法</text>
+        </view>
+        <view class="feature-arrow">→</view>
+      </view>
+
+      <view class="feature-card" bindtap="goToSubscription">
+        <view class="feature-icon subscription-icon">
+          <text class="icon-text">进</text>
+        </view>
+        <view class="feature-content">
+          <text class="feature-title">进阶陪伴</text>
+          <text class="feature-desc">更多咨询额度，长期复盘关系进展</text>
+        </view>
+        <view class="feature-arrow">→</view>
+      </view>
+    </view>
+
+    <view class="quick-actions">
+      <view class="quick-action" bindtap="goToProfile">
+        <text class="quick-icon">我</text>
+        <text class="quick-text">我的资料</text>
+      </view>
+      <view class="quick-action" bindtap="goToKnowledge">
+        <text class="quick-icon">问</text>
+        <text class="quick-text">今日技巧</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="footer">
+    <text class="footer-text">建议仅供参考，真诚和边界感永远优先。</text>
+  </view>
+</view>

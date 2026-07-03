@@ -1,0 +1,105 @@
+.knowledge-page {
+  min-height: 100vh;
+  background: #fff8f6;
+  padding: 32rpx;
+  box-sizing: border-box;
+}
+
+.hero {
+  padding: 42rpx 32rpx;
+  border-radius: 26rpx;
+  background: #ffffff;
+  box-shadow: 0 14rpx 38rpx rgba(90, 64, 56, 0.08);
+  margin-bottom: 24rpx;
+}
+
+.hero-title {
+  display: block;
+  color: #2f2928;
+  font-size: 42rpx;
+  font-weight: 800;
+  margin-bottom: 12rpx;
+}
+
+.hero-desc {
+  color: #7d716c;
+  font-size: 26rpx;
+  line-height: 1.65;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 18rpx;
+}
+
+.topic-card {
+  display: flex;
+  align-items: center;
+  min-height: 128rpx;
+  padding: 24rpx;
+  border-radius: 22rpx;
+  background: #ffffff;
+  box-shadow: 0 10rpx 28rpx rgba(90, 64, 56, 0.05);
+}
+
+.topic-card:active {
+  background: #fff1ec;
+}
+
+.topic-icon {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 20rpx;
+  background: #fff1ec;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32rpx;
+  margin-right: 22rpx;
+}
+
+.topic-content {
+  flex: 1;
+}
+
+.topic-title {
+  display: block;
+  color: #2f2928;
+  font-size: 30rpx;
+  font-weight: 800;
+  margin-bottom: 8rpx;
+}
+
+.topic-desc {
+  color: #8f8580;
+  font-size: 24rpx;
+  line-height: 1.5;
+}
+
+.topic-arrow {
+  color: #d8c8c0;
+  font-size: 42rpx;
+  margin-left: 16rpx;
+}
+
+.daily-tip {
+  margin-top: 26rpx;
+  padding: 28rpx;
+  border-radius: 22rpx;
+  background: #f7f3ef;
+}
+
+.tip-label {
+  display: block;
+  color: #b65d55;
+  font-size: 24rpx;
+  font-weight: 800;
+  margin-bottom: 10rpx;
+}
+
+.tip-text {
+  color: #3c3532;
+  font-size: 27rpx;
+  line-height: 1.7;
+}

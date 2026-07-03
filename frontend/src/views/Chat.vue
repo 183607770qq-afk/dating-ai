@@ -55,7 +55,7 @@
               </div>
             </div>
             <!-- 加载中消息 -->
-            <div v-if="loading" class="message ai-message">
+            <div v-if="loading && waitingForFirstChunk" class="message ai-message">
               <div class="message-avatar">
                 <img :src="aiAvatar" alt="AI" />
               </div>
@@ -112,16 +112,18 @@
 </template>
 
 <script setup>
-import { ref, nextTick } from 'vue'
+import { ref, nextTick, onMounted, watch } from 'vue'
 import { useUserStore } from '../store/user'
-import axios from 'axios'
 import { ElMessage } from 'element-plus'
 
 const userStore = useUserStore()
+const API_BASE_URL = 'http://localhost:8080/api'
 const chatMessages = ref(null)
 const messages = ref([])
 const inputMessage = ref('')
 const loading = ref(false)
+const waitingForFirstChunk = ref(false)
+const historyLoaded = ref(false)
 
 const userAvatar = 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=user%20avatar%20icon&image_size=square'
 const aiAvatar = 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=AI%20assistant%20avatar%20icon&image_size=square'
@@ -130,8 +132,42 @@ const handleLogout = () => {
   userStore.logout()
 }
 
+// 加载历史消息
+const loadHistory = async () => {
+  const token = localStorage.getItem('token')
+  if (!token) return
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/chat/recent?limit=20`, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    if (!response.ok) return
+
+    const data = await response.json()
+    if (data.messages && data.messages.length > 0) {
+      messages.value = data.messages
+      historyLoaded.value = true
+      await nextTick()
+      scrollToBottom()
+    }
+  } catch (e) {
+    console.error('Failed to load chat history:', e)
+  }
+}
+
+onMounted(() => {
+  loadHistory()
+})
+
+// 登录状态变化时重新加载历史
+watch(() => userStore.getIsLoggedIn, (loggedIn) => {
+  if (loggedIn && !historyLoaded.value) {
+    loadHistory()
+  }
+})
+
 const sendMessage = async () => {
-  if (!inputMessage.value.trim()) {
+  if (!inputMessage.value.trim() || loading.value) {
     return
   }
 
@@ -151,32 +187,116 @@ const sendMessage = async () => {
 
   // 显示加载状态
   loading.value = true
+  waitingForFirstChunk.value = true
+
+  messages.value.push({
+    role: 'ai',
+    content: ''
+  })
+  const aiMessageIndex = messages.value.length - 1
+
+  await nextTick()
+  scrollToBottom()
 
   try {
-    // 调用后端API获取AI回复
-    const response = await axios.post('/llm/advice', {
-      question: message
-    })
-
-    // 添加AI回复
-    messages.value.push({
-      role: 'ai',
-      content: response.data.advice
-    })
+    await streamAdvice(message, aiMessageIndex)
   } catch (error) {
-    // 添加错误消息
-    messages.value.push({
-      role: 'ai',
-      content: '抱歉，我暂时无法回答你的问题，请稍后再试。'
-    })
+    messages.value[aiMessageIndex].content = '抱歉，我暂时无法回答你的问题，请稍后再试。'
     ElMessage.error('获取AI回复失败')
   } finally {
     // 隐藏加载状态
     loading.value = false
+    waitingForFirstChunk.value = false
     // 滚动到底部
     await nextTick()
     scrollToBottom()
   }
+}
+
+const streamAdvice = async (question, aiMessageIndex) => {
+  const headers = {
+    'Content-Type': 'application/json',
+    'Accept': 'text/event-stream'
+  }
+
+  const token = localStorage.getItem('token')
+  if (token) {
+    headers.Authorization = `Bearer ${token}`
+  }
+
+  const response = await fetch(`${API_BASE_URL}/llm/stream/advice`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ question })
+  })
+
+  if (!response.ok) {
+    throw new Error(`Stream request failed: ${response.status}`)
+  }
+
+  if (!response.body) {
+    const fallback = await response.text()
+    await appendStreamContent(aiMessageIndex, fallback)
+    return
+  }
+
+  const reader = response.body.getReader()
+  const decoder = new TextDecoder('utf-8')
+  let buffer = ''
+
+  while (true) {
+    const { value, done } = await reader.read()
+    if (done) {
+      break
+    }
+
+    buffer += decoder.decode(value, { stream: true })
+    buffer = await consumeStreamBuffer(buffer, aiMessageIndex)
+  }
+
+  buffer += decoder.decode()
+  if (buffer.trim()) {
+    await consumeStreamBlock(buffer, aiMessageIndex)
+  }
+}
+
+const consumeStreamBuffer = async (buffer, aiMessageIndex) => {
+  const blocks = buffer.split(/\r?\n\r?\n/)
+  const rest = blocks.pop() || ''
+  for (const block of blocks) {
+    await consumeStreamBlock(block, aiMessageIndex)
+  }
+  return rest
+}
+
+const consumeStreamBlock = async (block, aiMessageIndex) => {
+  const dataLines = block
+    .split(/\r?\n/)
+    .filter((line) => line.startsWith('data:'))
+    .map((line) => line.substring(5).trim())
+
+  const data = dataLines.length ? dataLines.join('\n') : block.trim()
+  if (!data || data === '[DONE]') {
+    return
+  }
+
+  try {
+    const parsed = JSON.parse(data)
+    await appendStreamContent(aiMessageIndex, parsed.content || parsed.advice || '')
+  } catch (error) {
+    await appendStreamContent(aiMessageIndex, data)
+  }
+}
+
+const appendStreamContent = async (aiMessageIndex, content) => {
+  if (!content) {
+    return
+  }
+
+  waitingForFirstChunk.value = false
+  messages.value[aiMessageIndex].content += content
+  await nextTick()
+  scrollToBottom()
 }
 
 const scrollToBottom = () => {

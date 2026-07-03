@@ -1,0 +1,129 @@
+.subscription-page {
+  min-height: 100vh;
+  background: #fff8f6;
+  padding: 32rpx;
+  box-sizing: border-box;
+}
+
+.hero {
+  padding: 42rpx 32rpx;
+  border-radius: 26rpx;
+  background: #ffffff;
+  box-shadow: 0 14rpx 38rpx rgba(90, 64, 56, 0.08);
+  margin-bottom: 24rpx;
+}
+
+.hero-title {
+  display: block;
+  color: #2f2928;
+  font-size: 42rpx;
+  font-weight: 800;
+  margin-bottom: 12rpx;
+}
+
+.hero-desc {
+  color: #7d716c;
+  font-size: 26rpx;
+  line-height: 1.65;
+}
+
+.plan-card {
+  padding: 32rpx;
+  border-radius: 24rpx;
+  background: #ffffff;
+  margin-bottom: 22rpx;
+  box-shadow: 0 10rpx 28rpx rgba(90, 64, 56, 0.05);
+}
+
+.featured {
+  border: 2rpx solid #f0ddd6;
+}
+
+.plan-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.plan-name {
+  color: #2f2928;
+  font-size: 34rpx;
+  font-weight: 800;
+}
+
+.plan-tag {
+  padding: 8rpx 18rpx;
+  border-radius: 999rpx;
+  background: #fff1ec;
+  color: #b65d55;
+  font-size: 22rpx;
+  font-weight: 800;
+}
+
+.price-row {
+  display: flex;
+  align-items: flex-end;
+  margin-top: 22rpx;
+  margin-bottom: 22rpx;
+}
+
+.price {
+  color: #2f2928;
+  font-size: 60rpx;
+  font-weight: 800;
+}
+
+.period {
+  color: #8f8580;
+  font-size: 24rpx;
+  margin-left: 8rpx;
+  margin-bottom: 10rpx;
+}
+
+.benefits {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+  margin-bottom: 30rpx;
+}
+
+.benefit {
+  color: #5f5551;
+  font-size: 26rpx;
+}
+
+.primary-btn,
+.secondary-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 92rpx;
+  border-radius: 999rpx;
+  font-size: 30rpx;
+  font-weight: 800;
+}
+
+.primary-btn {
+  color: #ffffff;
+  background: #d85c5c;
+  box-shadow: 0 16rpx 34rpx rgba(216, 92, 92, 0.24);
+}
+
+.secondary-btn {
+  margin-top: 26rpx;
+  color: #b65d55;
+  background: #fff1ec;
+}
+
+.primary-btn:active,
+.secondary-btn:active {
+  transform: scale(0.98);
+}
+
+.free-desc {
+  display: block;
+  color: #8f8580;
+  font-size: 26rpx;
+  line-height: 1.6;
+  margin-top: 14rpx;
+}

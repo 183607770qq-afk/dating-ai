@@ -1,0 +1,40 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/chat/chat",
+    "pages/login/login",
+    "pages/register/register",
+    "pages/knowledge/knowledge",
+    "pages/subscription/subscription",
+    "pages/profile/profile"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#fff8f6",
+    "navigationBarTitleText": "脱单AI",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#fff8f6"
+  },
+  "tabBar": {
+    "color": "#9a8f8b",
+    "selectedColor": "#d85c5c",
+    "borderStyle": "white",
+    "backgroundColor": "#fffdfc",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/chat/chat",
+        "text": "咨询"
+      },
+      {
+        "pagePath": "pages/profile/profile",
+        "text": "我的"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

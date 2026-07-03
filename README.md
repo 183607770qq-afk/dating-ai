@@ -1,15 +1,16 @@
 # 脱单AI - 智能脱单助手
 
-一个基于AI技术的智能脱单助手小程序，提供专业的情感咨询和脱单建议。
+一个基于AI技术的智能脱单助手，支持Web端和微信小程序，提供专业的情感咨询和脱单建议。
 
 ## 项目简介
 
-脱单AI是一个现代化的情感咨询平台，结合了大语言模型（DeepSeek）和向量数据库（Milvus）技术，为用户提供：
+脱单AI是一个现代化的情感咨询平台，结合了大语言模型（DeepSeek/Ollama）和向量数据库（Milvus）技术，为用户提供：
 
-- 🤖 **AI情感咨询**：基于DeepSeek大模型，提供专业的情感建议
+- 🤖 **AI情感咨询**：基于大语言模型，提供专业的情感建议，支持**流式输出**（打字机效果）
 - 📚 **情感知识库**：丰富的情感知识内容，帮助用户提升社交技能
 - 💳 **订阅服务**：解锁更多高级功能，获得专属脱单指导
 - 🔐 **用户管理**：完整的用户认证和权限控制系统
+- 📱 **微信小程序**：支持微信小程序端访问，随时随地获取情感咨询
 
 ## 技术栈
 
@@ -19,10 +20,12 @@
 - **数据库**：MySQL 8.0
 - **向量数据库**：Milvus 2.3
 - **ORM**：Spring Data JPA
-- **LLM**：DeepSeek API
+- **LLM**：DeepSeek API / Ollama
+- **AI编排**：LangChain4j
+- **流式响应**：SSE (Server-Sent Events)
 - **构建工具**：Maven
 
-### 前端
+### 前端（Web）
 - **框架**：Vue 3 + Vite
 - **状态管理**：Pinia
 - **路由**：Vue Router
@@ -30,13 +33,53 @@
 - **HTTP客户端**：Axios
 - **日期处理**：Day.js
 
+### 前端（微信小程序）
+- **框架**：微信小程序原生框架
+- **UI设计**：自定义组件
+- **流式响应**：wx.request stream API
+
+## 项目结构
+
+```
+dating-ai/
+├── backend/                    # 后端服务
+│   ├── src/main/java/
+│   │   └── com/datingai/
+│   │       ├── controller/     # REST API控制器
+│   │       │   ├── LLMController.java          # 普通LLM接口
+│   │       │   └── StreamLLMController.java    # 流式LLM接口（新增）
+│   │       ├── llm/           # LLM服务层
+│   │       │   ├── DatingAdviceAssistant.java  # LangChain4j AI Service接口
+│   │       │   ├── LLMService.java             # 普通LLM服务
+│   │       │   └── StreamLLMService.java       # 流式LLM服务（新增）
+│   │       ├── config/
+│   │       │   └── LangChain4jConfig.java      # LangChain4j模型和AI Service配置
+│   │       └── ...            # 其他模块
+│   └── pom.xml
+├── frontend/                   # Web前端
+│   ├── src/
+│   │   ├── views/
+│   │   │   └── Chat.vue       # Web端聊天页面
+│   │   └── ...
+│   └── package.json
+├── miniprogram/               # 微信小程序（新增）
+│   ├── pages/
+│   │   ├── index/             # 首页
+│   │   └── chat/              # 聊天页面（流式输出）
+│   ├── app.js
+│   ├── app.json
+│   └── app.wxss
+└── README.md
+```
+
 ## 系统要求
 
 - **Java**：JDK 17+
 - **Node.js**：18+
 - **MySQL**：8.0+
-- **Milvus**：2.3+
+- **Milvus**：2.3+（可选）
 - **Maven**：3.8+
+- **微信开发者工具**（用于小程序开发）
 
 ## 部署步骤
 
@@ -83,12 +126,16 @@ mysql -u root -p
 CREATE DATABASE dating_ai_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
-#### 1.4 安装Milvus（可选，用于向量检索）
+#### 1.4 安装Ollama（推荐本地开发）
 ```bash
-# 使用Docker安装Milvus
-docker-compose -f milvus-docker-compose.yml up -d
+# 安装Ollama
+curl -fsSL https://ollama.com/install.sh | sh
 
-# 或者参考官方文档：https://milvus.io/docs/install_standalone-docker.md
+# 拉取LLM模型
+ollama pull qwen3-vl:8b
+
+# 启动Ollama服务
+ollama serve
 ```
 
 ### 2. 后端部署
@@ -102,13 +149,18 @@ spring.datasource.url=jdbc:mysql://localhost:3306/dating_ai_db?useSSL=false&serv
 spring.datasource.username=your_mysql_username
 spring.datasource.password=your_mysql_password
 
-# Milvus配置（可选）
-milvus.host=localhost
-milvus.port=19530
+# LLM配置 - 使用Ollama（推荐本地开发）
+llm.provider=langchain4j
+llm.api.url=http://localhost:11434/api/chat
+llm.base-url=http://localhost:11434
+llm.model=qwen3-vl:4b
+llm.temperature=0.7
+llm.timeout=PT60S
 
-# DeepSeek API配置
-llm.api.url=https://api.deepseek.com/v1/chat/completions
-llm.api.key=your_deepseek_api_key
+# LLM配置 - 使用DeepSeek（服务器使用）
+# llm.api.url=https://api.deepseek.com/v1/chat/completions
+# llm.api.key=your_deepseek_api_key
+# llm.model=deepseek-chat
 
 # JWT密钥配置
 jwt.secret=your_jwt_secret_key
@@ -139,7 +191,47 @@ nohup java -jar target/dating-ai-backend-0.0.1-SNAPSHOT.jar > app.log 2>&1 &
 
 后端服务默认运行在 `http://localhost:8080`
 
-### 3. 前端部署
+### 2.4 LangChain4j 学习入口
+
+本项目普通问答接口 `/api/llm/advice` 已经接入 LangChain4j，核心代码建议按下面顺序阅读：
+
+1. `backend/pom.xml`
+   - 引入 `langchain4j` 和 `langchain4j-ollama`。
+   - `langchain4j` 提供 AI Service、Prompt 注解等核心能力。
+   - `langchain4j-ollama` 提供 Ollama 模型适配器。
+
+2. `backend/src/main/java/com/datingai/config/LangChain4jConfig.java`
+   - 创建 `ChatModel`，这是 LangChain4j 对聊天模型的统一抽象。
+   - 创建 `DatingAdviceAssistant`，LangChain4j 会为这个接口动态生成实现类。
+
+3. `backend/src/main/java/com/datingai/llm/DatingAdviceAssistant.java`
+   - 使用 `@SystemMessage` 定义 AI 角色、边界和长期规则。
+   - 使用 `@UserMessage` 定义用户问题模板。
+
+4. `backend/src/main/java/com/datingai/llm/LLMService.java`
+   - Controller 只调用 `LLMService`，不用关心底层模型实现。
+   - `llm.provider=langchain4j` 时走 LangChain4j。
+   - `llm.provider=legacy` 时走原来的手写 HTTP 请求。
+
+5. `backend/src/main/java/com/datingai/llm/LegacyDatingAdviceClient.java`
+   - 保留原始 HTTP 调用方式，方便和 LangChain4j 对照学习。
+   - 也给流式接口继续保留 `llm.api.url` 这类旧配置。
+
+如果想临时切回原来的手写 HTTP 实现，把配置改成：
+
+```properties
+llm.provider=legacy
+```
+
+可以用下面命令测试：
+
+```bash
+curl -X POST http://localhost:8080/api/llm/advice \
+  -H "Content-Type: application/json" \
+  -d '{"question":"第一次约会不知道聊什么，怎么自然开场？"}'
+```
+
+### 3. Web前端部署
 
 #### 3.1 安装依赖
 ```bash
@@ -150,12 +242,7 @@ npm install
 ```
 
 #### 3.2 配置API地址（可选）
-如果后端服务不在本地或端口不同，编辑 `frontend/src/main.js`：
-
-```javascript
-// 配置axios默认baseURL
-axios.defaults.baseURL = 'http://your_backend_host:your_backend_port/api'
-```
+如果后端服务不在本地或端口不同，编辑相关配置文件。
 
 #### 3.3 开发环境运行
 ```bash
@@ -173,191 +260,84 @@ npm run build
 # 构建后的文件在 dist/ 目录中
 ```
 
-#### 3.5 部署到Web服务器
-```bash
-# 使用Nginx部署示例
-# 1. 将 dist/ 目录中的文件复制到Nginx的web目录
-cp -r dist/* /var/www/html/dating-ai/
+### 4. 微信小程序开发
 
-# 2. 配置Nginx（/etc/nginx/sites-available/dating-ai）
-server {
-    listen 80;
-    server_name your_domain.com;
-    root /var/www/html/dating-ai;
-    index index.html;
+#### 4.1 打开小程序项目
+1. 打开微信开发者工具
+2. 选择"导入项目"
+3. 选择 `dating-ai/miniprogram` 目录
+4. 配置AppID（测试可使用测试号）
 
-    location / {
-        try_files $uri $uri/ /index.html;
-    }
+#### 4.2 配置API地址
+编辑 `miniprogram/app.js`：
 
-    location /api {
-        proxy_pass http://localhost:8080;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-    }
+```javascript
+App({
+  globalData: {
+    userInfo: null,
+    baseUrl: 'http://localhost:8080/api'  // 后端API地址
+  }
+})
+```
+
+#### 4.3 预览和调试
+- 在微信开发者工具中点击"预览"
+- 使用微信扫码在手机上预览
+- 调试模式下可查看控制台日志
+
+#### 4.4 发布小程序
+1. 在微信开发者工具中点击"上传"
+2. 登录微信公众平台提交审核
+3. 审核通过后发布
+
+## API接口说明
+
+### 普通问答接口
+```
+POST /api/llm/advice
+Content-Type: application/json
+
+{
+  "question": "你的情感问题"
 }
 
-# 3. 启用配置并重启Nginx
-sudo ln -s /etc/nginx/sites-available/dating-ai /etc/nginx/sites-enabled/
-sudo nginx -t
-sudo systemctl restart nginx
-```
-
-### 4. Docker部署（推荐）
-
-#### 4.1 创建Dockerfile
-创建 `backend/Dockerfile`：
-
-```dockerfile
-FROM openjdk:17-jdk-slim
-
-WORKDIR /app
-
-COPY target/dating-ai-backend-0.0.1-SNAPSHOT.jar app.jar
-
-EXPOSE 8080
-
-ENTRYPOINT ["java", "-jar", "app.jar"]
-```
-
-创建 `frontend/Dockerfile`：
-
-```dockerfile
-FROM node:18-alpine as build
-
-WORKDIR /app
-COPY package*.json ./
-RUN npm install
-COPY . .
-RUN npm run build
-
-FROM nginx:alpine
-COPY --from=build /app/dist /usr/share/nginx/html
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-
-EXPOSE 80
-
-CMD ["nginx", "-g", "daemon off;"]
-```
-
-#### 4.2 创建docker-compose.yml
-```yaml
-version: '3.8'
-
-services:
-  mysql:
-    image: mysql:8.0
-    environment:
-      MYSQL_ROOT_PASSWORD: root_password
-      MYSQL_DATABASE: dating_ai_db
-    ports:
-      - "3306:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql
-
-  milvus:
-    image: milvusdb/milvus:v2.3.4
-    ports:
-      - "19530:19530"
-    volumes:
-      - milvus_data:/var/lib/milvus
-
-  backend:
-    build: ./backend
-    ports:
-      - "8080:8080"
-    environment:
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/dating_ai_db
-      - SPRING_DATASOURCE_USERNAME=root
-      - SPRING_DATASOURCE_PASSWORD=root_password
-      - MILVUS_HOST=milvus
-      - LLM_API_KEY=your_deepseek_api_key
-    depends_on:
-      - mysql
-      - milvus
-
-  frontend:
-    build: ./frontend
-    ports:
-      - "80:80"
-    depends_on:
-      - backend
-
-volumes:
-  mysql_data:
-  milvus_data:
-```
-
-#### 4.3 使用Docker Compose部署
-```bash
-# 构建并启动所有服务
-docker-compose up -d --build
-
-# 查看服务状态
-docker-compose ps
-
-# 查看日志
-docker-compose logs -f backend
-
-# 停止服务
-docker-compose down
-```
-
-### 5. 云服务部署
-
-#### 5.1 阿里云ECS部署
-```bash
-# 1. 购买ECS实例（推荐2核4G以上配置）
-# 2. 配置安全组，开放80、8080端口
-# 3. 连接服务器并安装环境
-ssh root@your_server_ip
-
-# 安装Docker和Docker Compose
-curl -fsSL https://get.docker.com | sh
-sudo curl -L "https://github.com/docker/compose/releases/download/v2.20.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-sudo chmod +x /usr/local/bin/docker-compose
-
-# 上传项目文件并部署
-docker-compose up -d
-```
-
-#### 5.2 腾讯云部署
-类似阿里云，使用腾讯云服务器部署。
-
-### 6. 配置SSL证书（HTTPS）
-
-#### 6.1 使用Let's Encrypt免费证书
-```bash
-# 安装Certbot
-sudo apt install certbot python3-certbot-nginx
-
-# 获取证书
-sudo certbot --nginx -d your_domain.com
-
-# 自动续期
-sudo certbot renew --dry-run
-```
-
-#### 6.2 手动配置SSL
-```bash
-# 在Nginx配置中添加SSL配置
-server {
-    listen 443 ssl;
-    server_name your_domain.com;
-    
-    ssl_certificate /path/to/your/certificate.crt;
-    ssl_certificate_key /path/to/your/private.key;
-    
-    # 其他配置...
-}
-
-# HTTP重定向到HTTPS
-server {
-    listen 80;
-    server_name your_domain.com;
-    return 301 https://$server_name$request_uri;
+响应：
+{
+  "advice": "AI的回答内容"
 }
 ```
+
+### 流式问答接口（新增）
+```
+POST /api/llm/stream/advice
+Content-Type: application/json
+Accept: text/event-stream
+
+{
+  "question": "你的情感问题"
+}
+
+响应（SSE格式）：
+data: {"content": "AI回复的一部分"}
+data: {"content": "AI回复的下一部分"}
+data: [DONE]
+```
+
+## 流式输出实现原理
+
+### 后端实现
+- 使用 `SseEmitter` 创建Server-Sent Events连接
+- 流式读取LLM服务的响应
+- 逐块将内容推送给客户端
+
+### 前端实现（Web）
+- 使用 `EventSource` 或 `axios` 的流式响应功能
+- 实时更新UI，实现打字机效果
+
+### 小程序实现
+- 使用 `wx.request` 的 `responseType: 'stream'`
+- 通过 `getReader()` 读取数据流
+- 逐块解析SSE格式并更新界面
 
 ## 环境变量配置
 
@@ -367,16 +347,20 @@ server {
 | `SPRING_DATASOURCE_URL` | MySQL连接URL | `jdbc:mysql://localhost:3306/dating_ai_db` |
 | `SPRING_DATASOURCE_USERNAME` | MySQL用户名 | `root` |
 | `SPRING_DATASOURCE_PASSWORD` | MySQL密码 | - |
-| `MILVUS_HOST` | Milvus主机地址 | `localhost` |
-| `MILVUS_PORT` | Milvus端口 | `19530` |
-| `LLM_API_URL` | DeepSeek API地址 | `https://api.deepseek.com/v1/chat/completions` |
-| `LLM_API_KEY` | DeepSeek API密钥 | - |
+| `LLM_API_URL` | LLM API地址 | `http://localhost:11434/api/chat` |
+| `LLM_MODEL` | LLM模型名称 | `qwen3-vl:8b` |
+| `LLM_API_KEY` | DeepSeek API密钥（使用DeepSeek时） | - |
 | `JWT_SECRET` | JWT密钥 | - |
 
 ### 前端环境变量
 | 变量名 | 说明 | 默认值 |
 |--------|------|--------|
 | `VITE_API_BASE_URL` | 后端API地址 | `http://localhost:8080/api` |
+
+### 小程序配置
+| 配置项 | 说明 | 默认值 |
+|--------|------|--------|
+| `baseUrl` | 后端API地址 | `http://localhost:8080/api` |
 
 ## 测试账号
 
@@ -392,20 +376,24 @@ server {
 - 检查数据库配置是否正确
 - 检查防火墙设置
 
-### 2. Milvus连接失败
-- 检查Milvus服务是否启动
-- 检查Milvus配置是否正确
-- 如不需要向量检索，可暂时禁用Milvus相关功能
+### 2. Ollama连接失败
+- 检查Ollama服务是否启动（`ollama serve`）
+- 检查模型是否已拉取（`ollama list`）
 
-### 3. DeepSeek API调用失败
+### 3. 流式输出不工作
+- 检查后端是否正确配置了流式API
+- 检查网络连接
+- 检查浏览器控制台是否有错误
+
+### 4. 小程序无法访问后端API
+- 检查小程序的服务器域名配置
+- 检查后端CORS配置
+- 使用测试号时需开启"不校验域名"模式
+
+### 5. DeepSeek API调用失败
 - 检查API密钥是否正确
 - 检查网络连接
 - 检查API调用额度
-
-### 4. 前端无法访问后端API
-- 检查CORS配置
-- 检查API地址配置
-- 检查防火墙设置
 
 ## 维护与更新
 
@@ -437,10 +425,14 @@ npm install
 npm run build
 
 # 部署到Web服务器
-# 如果使用Docker
-docker-compose up -d --build frontend
+```
 
-# 如果手动部署，复制dist目录到Web服务器
+### 小程序更新
+```bash
+# 拉取最新代码
+git pull origin main
+
+# 在微信开发者工具中上传新版本
 ```
 
 ## 性能优化
@@ -450,21 +442,28 @@ docker-compose up -d --build frontend
 - 配置Redis缓存
 - 使用CDN加速静态资源
 - 启用Gzip压缩
+- SSE连接复用
 
 ### 前端优化
 - 启用代码分割
 - 使用懒加载
 - 优化图片资源
-- 启用Service Worker
+- 流式响应的UI优化
+
+### 小程序优化
+- 图片懒加载
+- 分包加载
+- 缓存策略优化
 
 ## 安全建议
 
 1. **修改默认密码**：部署后立即修改默认测试账号密码
 2. **使用HTTPS**：生产环境必须使用HTTPS
-3. **定期更新依赖**：及时更新第三方依赖库
-4. **配置防火墙**：只开放必要的端口
-5. **定期备份**：定期备份数据库和重要数据
-6. **监控日志**：配置日志监控和告警
+3. **配置域名白名单**：小程序需配置服务器域名
+4. **定期更新依赖**：及时更新第三方依赖库
+5. **配置防火墙**：只开放必要的端口
+6. **定期备份**：定期备份数据库和重要数据
+7. **监控日志**：配置日志监控和告警
 
 ## 技术支持
 

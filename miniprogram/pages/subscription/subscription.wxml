@@ -1,0 +1,31 @@
+<view class="subscription-page">
+  <view class="hero">
+    <text class="hero-title">订阅服务</text>
+    <text class="hero-desc">为高频咨询、约会复盘和长期成长准备更多额度</text>
+  </view>
+
+  <view class="plan-card featured">
+    <view class="plan-head">
+      <text class="plan-name">进阶会员</text>
+      <text class="plan-tag">推荐</text>
+    </view>
+    <view class="price-row">
+      <text class="price">¥29</text>
+      <text class="period">/ 月</text>
+    </view>
+    <view class="benefits">
+      <text wx:for="{{benefits}}" wx:key="*this" class="benefit">✓ {{item}}</text>
+    </view>
+    <view class="primary-btn" bindtap="handleSubscribe">
+      <text>{{isLoggedIn ? '立即开通' : '登录后开通'}}</text>
+    </view>
+  </view>
+
+  <view class="plan-card">
+    <text class="plan-name">免费体验</text>
+    <text class="free-desc">基础 AI 咨询、知识库浏览和个人中心功能保持可用。</text>
+    <view class="secondary-btn" bindtap="goToChat">
+      <text>先去咨询</text>
+    </view>
+  </view>
+</view>

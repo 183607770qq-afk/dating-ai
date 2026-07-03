@@ -1,0 +1,28 @@
+<view class="knowledge-page">
+  <view class="hero">
+    <text class="hero-title">情感知识库</text>
+    <text class="hero-desc">把聊天、约会和关系推进拆成可练习的小步骤</text>
+  </view>
+
+  <view class="section">
+    <view
+      wx:for="{{topics}}"
+      wx:key="title"
+      class="topic-card"
+      bindtap="openTopic"
+      data-index="{{index}}"
+    >
+      <view class="topic-icon">{{item.icon}}</view>
+      <view class="topic-content">
+        <text class="topic-title">{{item.title}}</text>
+        <text class="topic-desc">{{item.desc}}</text>
+      </view>
+      <text class="topic-arrow">›</text>
+    </view>
+  </view>
+
+  <view class="daily-tip">
+    <text class="tip-label">今日建议</text>
+    <text class="tip-text">先建立舒适感，再表达好感。一次只推进一个小台阶，会更自然。</text>
+  </view>
+</view>
